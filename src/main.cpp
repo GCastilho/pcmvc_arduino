@@ -1,9 +1,12 @@
 #include <Arduino.h>
 
+void networkSetup();
+void networkLoop();
+
 void setup() {
-  // put your setup code here, to run once:
+	networkSetup();
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+	networkLoop();
 }
