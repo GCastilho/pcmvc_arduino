@@ -1,4 +1,3 @@
-#include <SPI.h>
 #include <Ethernet.h>
 
 // Enter a MAC address for your controller below.
@@ -22,7 +21,7 @@ EthernetClient client;
 // Variables to measure the speed
 unsigned long beginMicros, endMicros;
 unsigned long byteCount = 0;
-bool printWebData = true;  // set to false for better speed measurement
+bool printWebData = true;	// Set to true to process and print server response
 
 void networkSetup() {
 	// start the Ethernet connection:
@@ -52,7 +51,7 @@ void networkSetup() {
 	}
 }
 
-void postToServer(String postData) {
+void postToServer(char *postData) {
 	Serial.print("connecting to ");
 	Serial.print(server);
 	Serial.println("...");
@@ -61,45 +60,41 @@ void postToServer(String postData) {
 	if (client.connect(server, 80)) {
 		Serial.print("connected to ");
 		Serial.println(client.remoteIP());
-		Serial.println();
 
 		// Make a HTTP POST request:
+		Serial.println("Sending POST data...");
+		Serial.println();
 		client.println("POST /telemetryProject/server/telemetry.php HTTP/1.1");
 		client.print("Host: ");
 		client.println(server);
 		client.println("User-Agent: Arduino/1.0");
 		client.println("Connection: close");
 		client.print("Content-Length: ");
-		client.println(postData.length());
+		client.println(strlen(postData));
 		client.println();
 		client.println(postData);
+		beginMicros = micros();
 	} else {
 		// if you didn't get a connection to the server:
 		Serial.println("connection failed");
+		return;
 	}
-	beginMicros = micros();
-}
 
-void networkLoop() {
-	// if there are incoming bytes available
-	// from the server, read them and print them:
-	int len = client.available();
-	if (len > 0) {
-		byte buffer[80];
-		if (len > 80) len = 80;
-		client.read(buffer, len);
-		if (printWebData) {
-			Serial.write(buffer, len); // show in the serial monitor (slows some boards)
+	// Read and print incoming bytes available from the server, if any
+	if (printWebData) {
+		Serial.println("Printing server response...");
+		while(client.connected()){
+			int len = client.available();
+			if (len > 0) {
+				byte buffer[80];
+				if (len > 80) len = 80;
+				client.read(buffer, len);
+				Serial.write(buffer, len); // show in the serial monitor (slows some boards)
+				byteCount = byteCount + len;
+			}
 		}
-		byteCount = byteCount + len;
-	}
-
-	// if the server's disconnected, stop the client:
-	if (!client.connected()) {
 		endMicros = micros();
-		Serial.println();
-		Serial.println("disconnecting.");
-		client.stop();
+		Serial.println("\n");
 		Serial.print("Received ");
 		Serial.print(byteCount);
 		Serial.print(" bytes in ");
@@ -110,10 +105,11 @@ void networkLoop() {
 		Serial.print(rate);
 		Serial.print(" kbytes/second");
 		Serial.println();
-
-		// do nothing forevermore:
-		while (true) {
-			delay(1);
-		}
+	} else {
+		Serial.println("Printing response disabled, skipping");
+		Serial.println();
 	}
+	// if the server's disconnected, stop the client:
+	Serial.println("disconnecting...");
+	client.stop();
 }
