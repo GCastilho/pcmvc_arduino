@@ -25,23 +25,13 @@ unsigned long byteCount = 0;
 bool printWebData = true;  // set to false for better speed measurement
 
 void networkSetup() {
-	// You can use Ethernet.init(pin) to configure the CS pin
-	//Ethernet.init(10);  // Most Arduino shields
-	//Ethernet.init(5);   // MKR ETH shield
-	//Ethernet.init(0);   // Teensy 2.0
-	//Ethernet.init(20);  // Teensy++ 2.0
-	//Ethernet.init(15);  // ESP8266 with Adafruit Featherwing Ethernet
-	//Ethernet.init(33);  // ESP32 with Adafruit Featherwing Ethernet
-
-	// Open serial communications and wait for port to open:
-	Serial.begin(9600);
-	while (!Serial) {
-		; // wait for serial port to connect. Needed for native USB port only
-	}
-
 	// start the Ethernet connection:
-	Serial.println("Initialize Ethernet with DHCP:");
-	if (Ethernet.begin(mac) == 0) {
+	Serial.println("Initializing Ethernet with DHCP:");
+	if (Ethernet.begin(mac)) {
+		Serial.print("  DHCP assigned IP ");
+		Serial.println(Ethernet.localIP());
+		delay(1000);	// give the Ethernet shield a second to initialize
+	} else {
 		Serial.println("Failed to configure Ethernet using DHCP");
 		// Check for Ethernet hardware present
 		if (Ethernet.hardwareStatus() == EthernetNoHardware) {
@@ -52,15 +42,17 @@ void networkSetup() {
 		}
 		if (Ethernet.linkStatus() == LinkOFF) {
 			Serial.println("Ethernet cable is not connected.");
+			while(true){
+				delay(1); // do nothing
+			}
 		}
 		// try to congifure using IP address instead of DHCP:
+		Serial.println("Warning: trying to configure internet without DHCP");
 		Ethernet.begin(mac, ip, myDns);
-	} else {
-		Serial.print("  DHCP assigned IP ");
-		Serial.println(Ethernet.localIP());
 	}
-	// give the Ethernet shield a second to initialize:
-	delay(1000);
+}
+
+void postToServer(String postData) {
 	Serial.print("connecting to ");
 	Serial.print(server);
 	Serial.println("...");
@@ -69,12 +61,18 @@ void networkSetup() {
 	if (client.connect(server, 80)) {
 		Serial.print("connected to ");
 		Serial.println(client.remoteIP());
-		// Make a HTTP request:
-		client.println("GET /telemetryProject/server/ HTTP/1.1");
+		Serial.println();
+
+		// Make a HTTP POST request:
+		client.println("POST /telemetryProject/server/telemetry.php HTTP/1.1");
 		client.print("Host: ");
 		client.println(server);
+		client.println("User-Agent: Arduino/1.0");
 		client.println("Connection: close");
+		client.print("Content-Length: ");
+		client.println(postData.length());
 		client.println();
+		client.println(postData);
 	} else {
 		// if you didn't get a connection to the server:
 		Serial.println("connection failed");
