@@ -2,14 +2,14 @@
 #include "telemetryProject.h"
 #include "network.cpp"
 
-char* buildMessage(const char*, float, float, struct telemetry[], size_t);
+char* buildMessage(const char*, const char*, const char*, struct telemetry[], size_t);
 char* getMessageSignature(char*, const char*);
 char* buildPostData(char*, char*);
 
 const char apiKey[] = "alsdkhf9432ksledhfasidfaskdjhf";
 const char RA[] = "2761234567890";
-const float latitude = -22.8044635;
-const float longitude = -47.3158102;
+const char latitude[] = "-22.8044635";
+const char longitude[] = "-47.3158102";
 
 void setup() {
 	// Initialize serial if connected
@@ -27,7 +27,11 @@ void setup() {
 	//TODO: Fixed array size of 30 (or less)
 	char* message = buildMessage(RA, latitude, longitude, telemetryArray, sizeof(telemetryArray) / sizeof(*telemetryArray));
 	Serial.println(message);
+	
+	char* signature = getMessageSignature(message, apiKey);
+	Serial.println(signature);
 	free(message);
+	free(signature);
 
 	char postData[] = "{\"version\": 0.1,\"RA\": 2761234567890,\"telemetry\": [{\"timestamp\": 1552146530,\"latitude\": -22.8044635,\"longitude\": -47.3158102,\"windVelocity\": 64},{\"timestamp\": 1552148940,\"latitude\": -22.8044635,\"longitude\": -47.3158102,\"windVelocity\": 44}]}";
 

@@ -1,10 +1,9 @@
 #include "telemetryProject.h"
 #include <ArduinoJson.h>
 
-char* buildMessage(const char* RA, float latitude, float longitude, struct telemetry telemetryArray[], size_t arr_len) {
-
+char* buildMessage(const char* RA, const char* latitude, const char* longitude, struct telemetry telemetryArray[], size_t arr_len) {
 	// allocate the memory for the document  (a + b + c + d)
-	const size_t CAPACITY = JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(30) + 30*JSON_OBJECT_SIZE(2);
+	const size_t CAPACITY = JSON_OBJECT_SIZE(3) + JSON_OBJECT_SIZE(3) + JSON_ARRAY_SIZE(30) + 2*JSON_OBJECT_SIZE(2);
 	StaticJsonDocument<CAPACITY> message;
 
 	// a ('telemetry' is a property of 'a')
