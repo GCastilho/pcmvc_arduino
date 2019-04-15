@@ -51,7 +51,7 @@ class NetworkManager {
 		}
 	}
 
-	public: void post(char *postData) {
+	public: void post(char* postData) {
 		Serial.print("connecting to ");
 		Serial.print(server);
 		Serial.println("...");
