@@ -17,6 +17,7 @@ void setup() {
 		Serial.begin(9600);
 	}
 	Serial.println("START");
+	//class NetworkManager connection;
 
 	struct telemetry telemetryArray[2];
 	telemetryArray[0].timestamp = 1552146530;
@@ -24,18 +25,17 @@ void setup() {
 	telemetryArray[1].timestamp = 1552148940;
 	telemetryArray[1].windVelocity = 44;
 
-	//TODO: Fixed array size of 30 (or less)
+	//TODO: Fixed array size
 	char* message = buildMessage(RA, latitude, longitude, telemetryArray, sizeof(telemetryArray) / sizeof(*telemetryArray));
-	Serial.println(message);
-	
 	char* signature = getMessageSignature(message, apiKey);
-	Serial.println(signature);
+	char* postData = buildPostData(message, signature);
 	free(message);
 	free(signature);
 
-	char postData[] = "{\"version\": 0.1,\"RA\": 2761234567890,\"telemetry\": [{\"timestamp\": 1552146530,\"latitude\": -22.8044635,\"longitude\": -47.3158102,\"windVelocity\": 64},{\"timestamp\": 1552148940,\"latitude\": -22.8044635,\"longitude\": -47.3158102,\"windVelocity\": 44}]}";
+	Serial.println(postData);
 
-	connection.post(postData);
+	free(postData);
+	//connection.post(message);
 	Serial.println("END");
 }
 
