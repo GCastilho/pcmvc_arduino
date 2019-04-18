@@ -4,10 +4,10 @@
 char* getMessageSignature(char* message, const char* apiKey) {
 	class SHA512 sha512;
 
-	char* data = (char*) malloc(sizeof(char) * strlen(message));
-	strcpy(data, message);
+	char* msg = (char*) malloc(sizeof(char) * strlen(message));
+	strcpy(msg, message);
 	
-	sha512.update(data, strlen(data));
+	sha512.update(msg, strlen(msg));
 	sha512.update(apiKey, strlen(apiKey));
 
 	size_t hash_size = sha512.hashSize();
@@ -27,7 +27,7 @@ char* getMessageSignature(char* message, const char* apiKey) {
 		}
 	}
 
-	free(data);
+	free(msg);
 
 	return string;
 }

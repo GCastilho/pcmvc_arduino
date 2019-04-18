@@ -5,6 +5,9 @@
 char* buildMessage(const char*, const char*, const char*, struct telemetry[], size_t);
 char* getMessageSignature(char*, const char*);
 char* buildPostData(char*, char*);
+void rtcSetup();
+float getRtcTemperature();
+uint32_t getEpoch32Time();
 
 const char apiKey[] = "alsdkhf9432ksledhfasidfaskdjhf";
 const char RA[] = "2761234567890";
@@ -17,9 +20,11 @@ void setup() {
 		Serial.begin(9600);
 	}
 	Serial.println("START");
+	Serial.println("Starting RTC");
+	rtcSetup();
 	//class NetworkManager connection;
 
-	struct telemetry telemetryArray[2];
+	/*struct telemetry telemetryArray[2];
 	telemetryArray[0].timestamp = 1552146530;
 	telemetryArray[0].windVelocity = 64;
 	telemetryArray[1].timestamp = 1552148940;
@@ -34,7 +39,8 @@ void setup() {
 
 	Serial.println(postData);
 
-	free(postData);
+	free(postData);*/
+
 	//connection.post(message);
 	Serial.println("END");
 }
