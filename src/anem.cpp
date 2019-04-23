@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#define Hall sensor 2			//  Pino digital 2
+#define Hall sensor 2	//  Pino digital 2
 
 class Anemometro {
 	private:
