@@ -2,13 +2,12 @@
 #include <SHA512.h>
 
 class HashHandler {
-	private:
+	public: static String signMessage(String message, const char* apiKey) {
 		class SHA512 sha512;
-		size_t msg_size;
-		String signature;
-		//char buffer[hash_size+1];
 
-	public: String signMessage(String message, const char* apiKey) {
+		size_t msg_size = message.length()+1;
+		String signature;
+
 		char msg[msg_size];
 		message.toCharArray(msg, msg_size);
 		

@@ -9,6 +9,9 @@ volatile unsigned int Anemometro::counter;
 void rtcSetup();
 float getRtcTemperature();
 uint32_t getEpoch32Time();
+NetworkManager* connection;
+Anemometro* anem;
+JsonHandler* json;
 
 const char apiKey[] = "alsdkhf9432ksledhfasidfaskdjhf";
 const char RA[] = "2761234567890";
@@ -16,20 +19,16 @@ const char latitude[] = "-22.8044635";
 const char longitude[] = "-47.3158102";
 const uint8_t tArraySize = 1;
 
-class Anemometro anem;
-class JsonHandler json;
-class HashHandler hash;
-
 void setup() {
 	// Initialize serial if connected
 	if(Serial) {
 		Serial.begin(9600);
 	}
 	Serial.println("START SETUP");
-	Serial.println("Starting RTC");
 	rtcSetup();
-	//class NetworkManager connection;
-	
+	//connection = new NetworkManager();
+	anem = new Anemometro();
+	json = new JsonHandler();
 
 	//connection.post(message);
 	Serial.println("END SETUP");
@@ -40,7 +39,7 @@ void loop() {
 	for (size_t i = 0; i < tArraySize; i++) {
 		Serial.print("Starting measurement...");
 
-		telemetryArray[i].windVelocity = anem.getWindVelocity();
+		telemetryArray[i].windVelocity = anem->getWindVelocity();
 		telemetryArray[i].timestamp = getEpoch32Time();
 
 		Serial.println(" finished.");
@@ -54,15 +53,15 @@ void loop() {
 	String postData;
 	{
 		String postBuffer[2];
-		postBuffer[0] = json.buildMessage(RA, latitude, longitude, telemetryArray, tArraySize);
+		postBuffer[0] = json->buildMessage(RA, latitude, longitude, telemetryArray, tArraySize);
 		Serial.print("message: ");
 		Serial.println(postBuffer[0]);
 
-		postBuffer[1] = hash.signMessage(postBuffer[0], apiKey);
+		postBuffer[1] = HashHandler::signMessage(postBuffer[0], apiKey);
 		Serial.print("signature: ");
 		Serial.println(postBuffer[1]);
 
-		postData = json.buildPostData(postBuffer[0], postBuffer[1]);
+		postData = json->buildPostData(postBuffer[0], postBuffer[1]);
 	}
 	Serial.println(postData);
 }
