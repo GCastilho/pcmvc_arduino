@@ -1,3 +1,4 @@
+#define ever ;;
 #include <Ethernet.h>
 
 class NetworkManager {
@@ -37,12 +38,12 @@ class NetworkManager {
 			// Check for Ethernet hardware present
 			if (Ethernet.hardwareStatus() == EthernetNoHardware) {
 				Serial.println("Ethernet shield was not found. Sorry, can't run without hardware. :(");
-				while (true) {
+				for (ever) {
 					delay(1); // do nothing, no point running without Ethernet hardware
 				}
 			} else if (Ethernet.linkStatus() == LinkOFF) {
 				Serial.println("Ethernet cable is not connected.");
-				while(true){
+				for (ever) {
 					delay(1); // do nothing
 				}
 			} else {
@@ -53,65 +54,72 @@ class NetworkManager {
 		}
 	}
 
-	public: void post(String* postData) {
-		Serial.println("connecting to ");
+	public: void post(char* postData) {
+		Serial.print("Connecting to ");
 		Serial.print(server);
-		Serial.println("...");
+		Serial.print("... ");
 
 		// Try to connect to the server
 		if (client->connect(server, 80)) {
-			Serial.print("connected to ");
-			Serial.println(client->remoteIP());
+			Serial.print("Connected (");
+			Serial.print(client->remoteIP());
+			Serial.println(")");
 
 			// Make a HTTP POST request:
-			Serial.println("Sending POST data...");
-			Serial.println();
+			Serial.print("Sending POST request... ");
 			client->println("POST /telemetryProject/server/telemetry.php HTTP/1.1");
 			client->print("Host: ");
 			client->println(server);
 			client->println("User-Agent: Arduino/1.0");
 			client->println("Connection: close");
 			client->print("Content-Length: ");
-			client->println(postData->length());
+			client->println(strlen(postData));
 			client->println();
-			client->println(*postData);
+			client->println(postData);
+			Serial.println("Done");
+			Serial.println();
 			beginMicros = micros();
+
+			// Libera 'postData' da memória
+			free(postData);
+
+			// Read and print incoming bytes available from the server, if any
+			if (printWebData) {
+				Serial.println("Printing server response...");
+				while(client->connected()){
+					int len = client->available();
+					if (len > 0) {
+						byte buffer[80];
+						if (len > 80) len = 80;
+						client->read(buffer, len);
+						Serial.write(buffer, len);
+						byteCount = byteCount + len;
+					}
+				}
+				//Print approximate connection velocity
+				endMicros = micros();
+				Serial.println("\n");
+				Serial.print("Received ");
+				Serial.print(byteCount);
+				Serial.print(" bytes in ");
+				float seconds = (float)(endMicros - beginMicros) / 1000000.0;
+				Serial.print(seconds, 4);
+				float rate = (float)byteCount / seconds / 1000.0;
+				Serial.print(", rate = ");
+				Serial.print(rate);
+				Serial.print(" kbytes/second");
+				Serial.println();
+			} else {
+				Serial.println("Printing response disabled, skipping");
+				Serial.println();
+			}
+			Serial.println("disconnecting...");
+			Serial.println();
+			client->stop();
 		} else {
-			Serial.println("connection failed");
+			Serial.println("Connection failed");
+			free(postData);
 			return;
 		}
-
-		// Read and print incoming bytes available from the server, if any
-		if (printWebData) {
-			Serial.println("Printing server response...");
-			while(client->connected()){
-				int len = client->available();
-				if (len > 0) {
-					byte buffer[80];
-					if (len > 80) len = 80;
-					client->read(buffer, len);
-					Serial.write(buffer, len);
-					byteCount = byteCount + len;
-				}
-			}
-			//Print approximate connection velocity
-			endMicros = micros();
-			Serial.println("\n");
-			Serial.print("Received ");
-			Serial.print(byteCount);
-			Serial.print(" bytes in ");
-			float seconds = (float)(endMicros - beginMicros) / 1000000.0;
-			Serial.print(seconds, 4);
-			float rate = (float)byteCount / seconds / 1000.0;
-			Serial.print(", rate = ");
-			Serial.print(rate);
-			Serial.print(" kbytes/second");
-			Serial.println();
-		} else {
-			Serial.println("Printing response disabled, skipping");
-			Serial.println();
-		}
-		Serial.println("disconnecting...");
-		client->stop();
 	}
 };
