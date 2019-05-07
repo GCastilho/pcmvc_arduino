@@ -44,8 +44,8 @@ void loop() {
 			int ra = strlen(RA);
 			int lat = strlen(latitude);
 			int lon = strlen(longitude);
-			int hgt = 4;
-			int wind = 4;
+			int hgt = 5;		// Suporta até 99.99 metros
+			int wind = 5;		// Suporta até 99.99 m/s
 			int pipe = 1;
 			int sha_size = 64;
 
@@ -77,17 +77,17 @@ void loop() {
 
 		strcat(message, "\"hgt\":");				// 6
 		{
-			char buffer[5];							// Buffer big enough for 4-character float
-			dtostrf(height, 4, 2, buffer);			// Leave room for too large numbers!
-			strcat(message, buffer);				// 4
+			char buffer[6];							// Buffer big enough for 5-character float
+			dtostrf(height, 5, 2, buffer);			// Leave room for too large numbers!
+			strcat(message, buffer);				// hgt: 5
 		}
 		strcat(message, ",");						// 1
 
 		strcat(message, "\"wind\":");				// 7
 		{
-			char buffer[5];							// Buffer big enough for 4-character float
-			dtostrf(windVelocity, 4, 2, buffer);	// Leave room for too large numbers!
-			strcat(message, buffer);				// 4
+			char buffer[6];							// Buffer big enough for 6-character float
+			dtostrf(windVelocity, 5, 2, buffer);	// Leave room for too large numbers!
+			strcat(message, buffer);				// wind: 5
 		}
 
 		strcat(message, "}");						// 1
@@ -116,9 +116,12 @@ void loop() {
 		}
 	}
 	Serial.println("Done");
+	Serial.print("Message: ");
+	Serial.println(postData);
 
 	// Envia 'postData' para o servidor
 	connection->post(postData);
 
-	// 'postData' é liberado da memória em connection->post()
+	// Libera 'postData' da memória
+	free(postData);
 }

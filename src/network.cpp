@@ -66,7 +66,7 @@ class NetworkManager {
 			Serial.println(")");
 
 			// Make a HTTP POST request:
-			Serial.print("Sending POST request... ");
+			Serial.print("Sending POST HTTP request... ");
 			client->println("POST /telemetryProject/server/telemetry.php HTTP/1.1");
 			client->print("Host: ");
 			client->println(server);
@@ -79,9 +79,6 @@ class NetworkManager {
 			Serial.println("Done");
 			Serial.println();
 			beginMicros = micros();
-
-			// Libera 'postData' da memória
-			free(postData);
 
 			// Read and print incoming bytes available from the server, if any
 			if (printWebData) {
@@ -118,8 +115,6 @@ class NetworkManager {
 			client->stop();
 		} else {
 			Serial.println("Connection failed");
-			free(postData);
-			return;
 		}
 	}
 };
