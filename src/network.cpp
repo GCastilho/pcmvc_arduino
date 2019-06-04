@@ -67,7 +67,7 @@ class NetworkManager {
 
 			// Make a HTTP POST request:
 			Serial.print("Sending POST HTTP request... ");
-			client->println("POST /telemetryProject/server/telemetry.php HTTP/1.1");
+			client->println("POST /telemetry.php HTTP/1.1");
 			client->print("Host: ");
 			client->println(server);
 			client->println("User-Agent: Arduino/1.0");

@@ -60,7 +60,7 @@ void loop() {
 		// Cria o JSON object message
 		strcpy(message, "{");						// 1 caractere
 
-		strcat(message, "\"version\":0.4");			// 13
+		strcat(message, "\"version\":1.0");			// 13
 		strcat(message, ",");						// 1
 
 		strcat(message, "\"RA\":");					// 5

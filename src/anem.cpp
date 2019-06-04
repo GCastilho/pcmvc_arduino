@@ -6,7 +6,7 @@ class Anemometro {
 		// Constants definitions
 		const float pi = 3.14159265;	// Numero pi
 		const int period = 5000;		// Tempo de medida(miliseconds)
-		const int radius = 147;			// Raio do anemometro(mm)
+		const int radius = 80;			// Raio do anemometro(mm)
 		// Variable definitions
 		static volatile unsigned int counter;	// magnet counter for sensor
 		unsigned int RPM;			// Revolutions per minute
@@ -30,7 +30,7 @@ class Anemometro {
 		while(millis() < startTime + period)
 
 		RPM = ((counter)*60)/(period/1000);
-		windSpeed = ((2 * pi * radius * RPM)/60) / 1000;
+		windSpeed = ((4 * pi * radius * RPM)/60) / 1000;
 
 		return windSpeed;
 	}
