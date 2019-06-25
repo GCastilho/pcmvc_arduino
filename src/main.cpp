@@ -8,8 +8,8 @@ float windVelocity;
 NetworkManager* connection;
 Anemometro* anem;
 
-const char apiKey[] = "alsdkhf9432ksledhfasidfaskdjhf";
-const char RA[] = "2761234567890";
+const char apiKey[] = "edhfasidfaskdjalsdkhf9432kslhf";
+const char RA[] = "2760000000000";
 const char latitude[] = "-22.8044635";
 const char longitude[] = "-47.3158102";
 const float height = 2.0;

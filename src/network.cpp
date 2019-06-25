@@ -11,7 +11,7 @@ class NetworkManager {
 		byte mac[6] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
 
 		// Name address for Server 
-		const char server[15] = "192.168.97.164";
+		const char server[15] = "192.168.96.97";
 
 		// Variables to measure the speed
 		unsigned long beginMicros, endMicros;
