@@ -54,7 +54,7 @@ class NetworkManager {
 		}
 	}
 
-	public: void post(char* postData) {
+	public: void post(char* message, char* signature) {
 		Serial.print("Connecting to ");
 		Serial.print(server);
 		Serial.print("... ");
@@ -67,15 +67,17 @@ class NetworkManager {
 
 			// Make a HTTP POST request:
 			Serial.print("Sending POST HTTP request... ");
-			client->println("POST /telemetry.php HTTP/1.1");
+			client->println("POST /api/v1.0/telemetry/ HTTP/1.1");
 			client->print("Host: ");
 			client->println(server);
-			client->println("User-Agent: Arduino/1.0");
 			client->println("Connection: close");
 			client->print("Content-Length: ");
-			client->println(strlen(postData));
+			client->println(strlen(message));
+			client->println("User-Agent: Arduino/1.0");
+			client->print("Signature: ");
+			client->println(signature);
 			client->println();
-			client->println(postData);
+			client->println(message);
 			Serial.println("Done");
 			Serial.println();
 			beginMicros = micros();
@@ -83,7 +85,7 @@ class NetworkManager {
 			// Read and print incoming bytes available from the server, if any
 			if (printWebData) {
 				Serial.println("Printing server response...");
-				while(client->connected()){
+				do {
 					int len = client->available();
 					if (len > 0) {
 						byte buffer[80];
@@ -92,7 +94,7 @@ class NetworkManager {
 						Serial.write(buffer, len);
 						byteCount = byteCount + len;
 					}
-				}
+				} while(client->connected());
 				//Print approximate connection velocity
 				endMicros = micros();
 				Serial.println("\n");

@@ -9,7 +9,7 @@ NetworkManager* connection;
 Anemometro* anem;
 
 const char apiKey[] = "edhfasidfaskdjalsdkhf9432kslhf";
-const char RA[] = "2760000000000";
+const char matricula[] = "2760000000000";
 const char latitude[] = "-22.8044635";
 const char longitude[] = "-47.3158102";
 const float height = 2.0;
@@ -35,36 +35,33 @@ void loop() {
 
 	// Cria o json para enviar ao servidor
 	Serial.print("Building message to send to server... ");
-	char* postData;
+
+	char* message;
 	{
-		// Calcula tamanho necessário para o char do postData
+		// Calcula tamanho necessário para o char do message
 		int size;
 		{
-			int fixed_size = 1+13+1+5+1+6+1+6+1+6+1+7+1;
-			int ra = strlen(RA);
+			int fixed_size = 1+9+1+12+1+6+1+6+1+6+1+7+1;
+			int ra = strlen(matricula);
 			int lat = strlen(latitude);
 			int lon = strlen(longitude);
 			int hgt = 5;		// Suporta até 99.99 metros
 			int wind = 5;		// Suporta até 99.99 m/s
 			int pipe = 1;
-			int sha_size = 64;
 
-			size = fixed_size+ra+lat+lon+hgt+wind+pipe+sha_size;
+			size = fixed_size+ra+lat+lon+hgt+wind+pipe;
 		}
-		// Aloca espaço para o postData
-		postData = (char*)malloc(sizeof(char)*(size+1));
-
-		// Aponta o char array 'message' para o mesmo endereço que postData
-		char* message = postData;
+		// Aloca espaço para o message
+		message = (char*)malloc(sizeof(char)*(size+1));
 
 		// Cria o JSON object message
 		strcpy(message, "{");						// 1 caractere
 
-		strcat(message, "\"version\":1.0");			// 13
+		strcat(message, "\"ver\":1.0");				// 9
 		strcat(message, ",");						// 1
 
-		strcat(message, "\"RA\":");					// 5
-		strcat(message, RA);						// strlen()
+		strcat(message, "\"matricula\":");			// 12
+		strcat(message, matricula);					// strlen()
 		strcat(message, ",");						// 1
 
 		strcat(message, "\"lat\":");				// 6
@@ -91,9 +88,16 @@ void loop() {
 		}
 
 		strcat(message, "}");						// 1
+	}
+
+	char* signature;
+	{
+		// Aloca espaço para o signature
+		// Um sha256 ocupa 64 caracteres ao ser convertido para string
+		signature = (char*)malloc(sizeof(char)*(64+1));
 
 		// Cria o array signature; signature é um sha256 com hash_size de 32 bytes
-		uint8_t signature[32];
+		uint8_t raw_signature[32];
 
 		// Cria um sha256 da mensagem concatenada com a apiKey (signature)
 		{
@@ -102,26 +106,29 @@ void loop() {
 			sha256.update(message, strlen(message));
 			sha256.update(apiKey, strlen(apiKey));
 
-			sha256.finalize(signature, 32);
+			sha256.finalize(raw_signature, 32);
 		}
-
-		// Conctena o pipe para separar a mensagem da assinatura
-		strcat(postData, "|");
 
 		// Concatena a assinatura
 		for (size_t i = 0; i < 32; i++) {
 			char str[2];
-			sprintf(str, "%02x", signature[i]);
-			strcat(postData, str);
+			sprintf(str, "%02x", raw_signature[i]);
+			strcat(signature, str);
 		}
 	}
+
 	Serial.println("Done");
+
 	Serial.print("Message: ");
-	Serial.println(postData);
+	Serial.print(message);
 
-	// Envia 'postData' para o servidor
-	connection->post(postData);
+	Serial.print("Signature: ");
+	Serial.print(signature);
 
-	// Libera 'postData' da memória
-	free(postData);
+	// Envia 'message' e 'signature' para o servidor
+	connection->post(message, signature);
+
+	// Libera 'signature' e 'message' da memória
+	free(signature);
+	free(message);
 }
