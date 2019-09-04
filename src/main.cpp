@@ -120,10 +120,10 @@ void loop() {
 	Serial.println("Done");
 
 	Serial.print("Message: ");
-	Serial.print(message);
+	Serial.println(message);
 
 	Serial.print("Signature: ");
-	Serial.print(signature);
+	Serial.println(signature);
 
 	// Envia 'message' e 'signature' para o servidor
 	connection->post(message, signature);
